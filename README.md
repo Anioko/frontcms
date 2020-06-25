@@ -51,7 +51,7 @@ Navigate to the [main project page](https://github.com/hack4impact/flask-base) a
 ##### Clone the repository 
 
 ```
-$ git clone https://github.com/YOUR_USERNAME/REPO_NAME.git
+$ git clone https://github.com/Anioko/frontcms.git
 $ cd REPO_NAME
 ```
 
