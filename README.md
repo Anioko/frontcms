@@ -146,7 +146,12 @@ _Linux:_
 ```
 $ sudo apt-get install redis-server
 ```
+_Windows_
 
+Follow instructions here
+```
+https://stackoverflow.com/questions/6476945/how-do-i-run-redis-on-windows
+```
 You will also need to install **PostgresQL**
 
 _Mac (using homebrew):_
