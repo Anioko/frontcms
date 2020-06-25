@@ -4,7 +4,7 @@ import subprocess
 
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager, Shell
-from redis import Redis
+#from redis import Redis ##Uncomment when redis is installed
 from rq import Connection, Queue, Worker
 
 from app import create_app, db
