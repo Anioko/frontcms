@@ -1,0 +1,10 @@
+{% extends 'layouts/page.html' %}
+
+{% block title %}{{ super() }} &mdash; {{ page.Title }}{% endblock %}
+{% block page_content %}
+    <div class="ui text container">
+		 {{ page.Title }}
+      {{ page.Content|safe }}
+    </div>
+{% endblock %}
+

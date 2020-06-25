@@ -1,0 +1,37 @@
+
+{%  extends 'layouts/base.html'  %}
+{% import 'macros/form_macros.html' as f %}
+
+{% block content %}
+    <div class="ui grid container">
+        <div class="eight wide computer sixteen wide mobile centered column">
+			<!--<div class="ui raised segment">
+			  <h4>Example </h4>
+			   <p>Name : Car , Value : Volvo x60. Hopefully this makes sense. If it does not then search for read this annswer for 
+			   <a href="https://stackoverflow.com/questions/25955749/what-is-a-key-value-pair">Key Value pairs</a>
+			   </p>
+			   <p> Use Snake_Case style when inserting the names e.g 'Google_Analytics_Api' or 'Range_Rover' . </p>
+			</div>-->		
+            <h2 class="ui dividing header">Add Categories</h2>
+
+            {% set flashes = {
+                'error':   get_flashed_messages(category_filter=['form-error']),
+                'warning': get_flashed_messages(category_filter=['form-check-email']),
+                'info':    get_flashed_messages(category_filter=['form-info']),
+                'success': get_flashed_messages(category_filter=['form-success'])
+            } %}
+
+            {{ f.begin_form(form, flashes) }}
+                {{ f.render_form_field(form.name) }}
+                {{ f.render_form_field(form.slug) }}
+                {{ f.render_form_field(form.description) }}
+                {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
+                {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
+                {{ f.form_message(flashes['info'], header='Information', class='info') }}
+                {{ f.form_message(flashes['success'], header='Success!', class='success') }}
+
+                {{ f.render_form_field(form.submit) }}
+            {{ f.end_form(form) }}
+        </div>
+    </div>
+{% endblock %}

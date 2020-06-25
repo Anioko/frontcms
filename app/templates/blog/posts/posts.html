@@ -1,0 +1,68 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{title}} {% endblock %}
+
+{% block content %}
+    <div class="ui grid container">
+        <div class="eight wide computer sixteen wide mobile centered column">
+            <h1 class="ui container">
+                Site Settings
+                <a href="{{ url_for('settings.add_blog_post') }}" class="ui right floated button">
+                    <i class="plus icon"></i>Add
+                </a>
+            </h1>
+
+            <table class="ui selectable celled table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Slug</th>
+                        <th>Created By</th>
+                        <th>Created On</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts.items  %}
+                        <tr>
+                            <td>{{ post.title }}</td>
+                            <td>{{ post.slug }}</td>
+                            <td>{{ post.username }}</td>
+                            <td>{{ post.created_on.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ post.blogpoststatus.name }}</td>
+                            <td>
+                                <a href="{{ url_for('settings.edit_blog_post', post_id=post.id) }}"
+                                    class="ui primary button">
+                                    <i class="edit icon"></i>Edit
+                                </a>
+                                <a href="{{ url_for('settings.delete_blog_post', post_id=post.id) }}" class="ui button">
+                                    <i class="trash icon"></i>Delete
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+<button class="ui right labeled icon button">
+  <i class="right arrow icon">
+  </i>
+             {% if posts.has_prev %}
+          <a href="{{ url_for('settings.blog_posts', page=posts.prev_num) }}">Next </a>
+            {% else %}
+                <a>Next </a>
+            {% endif %}
+</button>
+<button class="ui leftlabeled icon button">
+  <i class="left arrow icon">
+  </i>
+             {% if posts.has_next%}
+          <a href="{{ url_for('settings.blog_posts', page=posts.next_num) }}">Previous</a>
+            {% else %}
+                <a>Previous</a>
+            {% endif %}
+</button>
+
+
+{% endblock %}

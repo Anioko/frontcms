@@ -1,0 +1,43 @@
+{% extends "layouts/base.html" %}
+{% import 'macros/form_macros.html' as f %}
+
+{% block content %}
+
+    <div class="ui grid container">
+        <div class="eight wide computer sixteen wide mobile centered column">
+            <h1 class="ui container">
+                Site Settings
+                <a href="{{ url_for('settings.add_menu') }}" class="ui right floated button">
+                    <i class="plus icon"></i>Add
+                </a>
+            </h1>	
+        </div>
+            <table class="ui selectable celled table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Created On</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for menu_item in menu_items %}
+                        <tr>
+							<td>{{ menu_item.name }}</td>
+
+							<td>{{ menu_item.created_on|datetime }}</td>
+                            <td>
+                                <a href="{{ url_for('settings.menu_item', menu_id=menu.id, item_id=menu_item.id) }}"
+                                    class="ui primary button">
+                                    <i class="edit icon"></i>Edit
+                                </a>
+                                <a href="{{ url_for('settings.delete_menu_item', menu_id=menu.id, item_id=menu_item.id) }}" class="ui button">
+                                    <i class="trash icon"></i>Delete
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    </div>
+{% endblock %}
