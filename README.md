@@ -51,7 +51,7 @@ Navigate to the [main project page](https://github.com/hack4impact/flask-base) a
 ##### Clone the repository 
 
 ```
-$ git clone https://github.com/YOUR_USERNAME/REPO_NAME.git
+$ git clone https://github.com/Anioko/frontcms.git
 $ cd REPO_NAME
 ```
 
@@ -146,7 +146,12 @@ _Linux:_
 ```
 $ sudo apt-get install redis-server
 ```
+_Windows_
 
+Follow instructions here
+```
+https://stackoverflow.com/questions/6476945/how-do-i-run-redis-on-windows
+```
 You will also need to install **PostgresQL**
 
 _Mac (using homebrew):_
