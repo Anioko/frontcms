@@ -68,13 +68,17 @@ def create_app(config):
         SSLify(app)
 
     # Create app blueprints
-    from .main import main as main_blueprint
-    app.register_blueprint(main_blueprint)
 
     from .account import account as account_blueprint
     app.register_blueprint(account_blueprint, url_prefix='/account')
 
     from .admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint, url_prefix='/admin')
+    
+    from .main import main as main_blueprint
+    app.register_blueprint(main_blueprint, url_prefix='/dashboard')
+
+    from .public import public as public_blueprint
+    app.register_blueprint(public_blueprint)
 
     return app

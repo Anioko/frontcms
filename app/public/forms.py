@@ -24,9 +24,14 @@ from flask_wtf import Form
 
 
 class SiteSettingForm(FlaskForm):
-    name = StringField("Name", validators=[InputRequired(), \
+    site_title = StringField("Site Title", validators=[InputRequired(), \
                         Length(min=1, max=128)])
-    value = StringField("Value", validators=[InputRequired()])
+    siteaddress=StringField("Site Address",validators=[InputRequired(), \
+                        Length(min=1, max=128)])
+    administration_user_address=StringField("Site Administration User Address",validators=[InputRequired(), \
+                        Length(min=1, max=128)])
+    site_Language=StringField("Site Language",validators=[InputRequired(), \
+                        Length(min=1, max=128)])
     submit = SubmitField('Submit')
     
 

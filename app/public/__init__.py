@@ -1,2 +1,2 @@
-from app.settings import errors  # noqa
-from app.settings.views import settings # noqa
+from app.public import errors  # noqa
+from app.public.views import public # noqa

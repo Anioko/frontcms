@@ -1,0 +1,68 @@
+{% extends 'layouts/public_base.html' %}
+{% macro dashboard_option(title, endpoint, description=None, icon=None) %}
+<a class="column" href="{{ url_for(endpoint) }}">
+    <div class="ui padded segment">
+        <h3 class="ui header">
+            {% if icon is not none %}
+            <i class="{{ icon }}"></i>
+            {% endif %}
+            <div class="content">
+                {{ title }}
+                {% if description is not none %}
+                <div class="sub header">
+                    {{ description }}
+                </div>
+                {% endif %}
+            </div>
+        </h3>
+    </div>
+</a>
+{% endmacro %}
+{% block content %}
+<div class="ui grid container">
+    <div class="eight wide computer sixteen wide mobile centered column">
+        <h1 class="ui container">
+            Site public
+           
+            <a href="{{ url_for('public.new_site_setting') }}" class="ui right floated button">
+                <i class="plus icon"></i>Add
+            </a>
+        
+        </h1>
+
+        <table class="ui selectable celled table">
+            <thead>
+                <tr>
+                    <th>Site Title</th>
+                    <th>Site Address</th>
+                    <th>Administration User Address</th>
+                    <th>Site Language</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for setting in public %}
+                <tr>
+                    <td>{{setting.site_title }}</td>
+                    <td>{{setting.siteaddress}}</td>
+                    <td>{{setting.administration_user_address}}</td>
+                    <td>{{setting.site_Language}}</td>
+                    <td><a href="{{ url_for('public.edit_site_setting', id=setting.id) }}" class="ui primary button">
+                            <i class="edit icon"></i>Edit
+                        </a></td>
+                    <td>
+
+
+                        <a href="{{ url_for('public.delete_site_setting', id=setting.id) }}" class="ui button">
+                            <i class="trash icon"></i>Delete
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

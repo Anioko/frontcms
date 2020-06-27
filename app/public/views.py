@@ -12,65 +12,86 @@ from app.models import Menu
 from app.models import MenuItem
 from .forms import EditMenuForm, EditMenuItemForm
 #from .forms import PostForm, CategoryForm, EditCategoryForm
-settings = Blueprint('settings', __name__)
+public = Blueprint('public', __name__)
 
 
+@public.route('/')
+def index():
+    
+    public = SiteSetting.query.limit(1).all()
+    return render_template("public/public.html",public=public)
 
-@settings.route('/')
+@public.route('/about')
+def about():
+    public = SiteSetting.find_all()
+    return render_template("public/about.html",public=public)
+
+@public.route('/all')
 @login_required
 @admin_required
-def site_settings():
-    all_settings = SiteSetting.query.all()
-    return render_template("settings/index.html",
-                           settings=all_settings)
+def site_public():
+    all_public = SiteSetting.query.all()
+    return render_template("public/index.html",
+                           public=all_public)
 
 
-@settings.route('/<int:id>', methods=['GET', 'POST'])
+@public.route('/<int:id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def edit_site_setting(id):
     form = SiteSettingForm()
 
-    site_setting = SiteSetting.query.filter_by(id=id).first()
+    site_setting = db.session.query(SiteSetting).filter(SiteSetting.id==id).first()
 
     if(site_setting is None):
         abort(404)
 
     if form.validate_on_submit():
-        site_setting.value = form.value.data
+        site_setting.site_title = form.site_title.data
+        site_setting.siteaddress= form.siteaddress.data
+        site_setting.administration_user_address=form.administration_user_address.data
+        site_setting.site_Language = form.site_Language.data
 
         db.session.add(site_setting)
-        flash('"{0}" has been saved'.format(site_setting.name))
+        flash('"{0}" has been saved'.format(site_setting.site_title))
 
-        return redirect(url_for('settings.site_settings'))
+        return redirect(url_for('public.site_public'))
 
-    form.name.data = site_setting.name
-    form.value.data = site_setting.value
+    form.site_title.data = site_setting.site_title
+    form.siteaddress.data = site_setting.siteaddress
+    form.administration_user_address.data= site_setting.administration_user_address
+    form.site_Language.data=site_setting.site_Language
 
-    return render_template("settings/edit.html", form=form,
+    return render_template("public/edit.html", form=form,
                            setting=site_setting)
 
 
-@settings.route('/new', methods=['GET', 'POST'])
+@public.route('/new', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def new_site_setting():
+    check_data_exists = SiteSetting.query.get(1)
+
+    #if check_data_exists is  None :
+       #return redirect(url_for('public.edit_site_setting',id=id))
     form = SiteSettingForm()
 
     if form.validate_on_submit():
         site_setting = SiteSetting()
-        site_setting.name = form.name.data
-        site_setting.value = form.value.data
+        site_setting.site_title = form.site_title.data
+        site_setting.siteaddress = form.siteaddress.data
+        site_setting.administration_user_address =form.administration_user_address.data
+        site_setting.site_Language = form.site_Language.data
 
         db.session.add(site_setting)
-        flash('"{0}" has been saved'.format(site_setting.name))
+        flash('"{0}" has been saved'.format(site_setting.site_title))
 
-        return redirect(url_for('settings.site_settings'))
+        return redirect(url_for('public.site_public'))
 
-    return render_template("settings/new.html", form=form)
+    return render_template("public/new.html", form=form)
 
 
-@settings.route('/status/new', methods=['GET', 'POST'])
+@public.route('/status/new', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def add_blog_status():
@@ -84,11 +105,11 @@ def add_blog_status():
         db.session.add(blog_post_status)
         flash('"{0}" has been saved'.format(blog_post_status.name))
 
-        return redirect(url_for('settings.add_blog_post'))
+        return redirect(url_for('public.add_blog_post'))
 
-    return render_template("settings/add_blog_status.html", form=form)
+    return render_template("public/add_blog_status.html", form=form)
 
-@settings.route('/delete/<int:id>')
+@public.route('/delete/<int:id>')
 @login_required
 @admin_required
 def delete_site_setting(id):
@@ -97,14 +118,14 @@ def delete_site_setting(id):
     if(setting is not None):
         db.session.delete(setting)
 
-        flash('"{0}" has been deleted.'.format(setting.name))
-        return redirect(url_for('settings.site_settings'))
+        flash('"{0}" has been deleted.'.format(setting.site_title))
+        return redirect(url_for('public.site_public'))
 
     flash('Setting does not exist')
-    return redirect(url_for('settings.site_settings'))
+    return redirect(url_for('public.site_public'))
     
-@settings.route('/posts', defaults={'page': 1})
-@settings.route('/posts/<int:page>')
+@public.route('/posts', defaults={'page': 1})
+@public.route('/posts/<int:page>')
 @login_required
 def blog_posts(page):
     the_posts = BlogPost.query.order_by(
@@ -112,7 +133,7 @@ def blog_posts(page):
     return render_template('blog/posts/posts.html', js='posts/index', posts=the_posts)
 
 
-@settings.route('/posts/<post_id>', methods=['GET', 'POST'])
+@public.route('/posts/<post_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def edit_blog_post(post_id):
@@ -145,7 +166,7 @@ def edit_blog_post(post_id):
     return render_template('blog/posts/edit_post.html', js='posts/edit_post', form=form, post=post)
 
 
-@settings.route('/posts/new', methods=['GET', 'POST'])
+@public.route('/posts/new', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def add_blog_post():
@@ -166,12 +187,12 @@ def add_blog_post():
         db.session.add(post)
         flash('"{0}" has been saved'.format(post.title))
 
-        return redirect(url_for('settings.blog_posts'))
+        return redirect(url_for('public.blog_posts'))
 
     return render_template('blog/posts/add_post.html', js='posts/add_post', form=form)
 
 
-@settings.route('/posts/delete/<post_id>', methods=['GET', 'POST'])
+@public.route('/posts/delete/<post_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def delete_blog_post(post_id):
@@ -184,11 +205,11 @@ def delete_blog_post(post_id):
         return redirect(url_for('.blog_posts'))
 
     flash('Post does not exist')
-    return redirect(url_for('settings.blog_posts'))
+    return redirect(url_for('public.blog_posts'))
 
 
-@settings.route('/categories', defaults={'page': 1})
-@settings.route('/categories/<int:page>')
+@public.route('/categories', defaults={'page': 1})
+@public.route('/categories/<int:page>')
 @login_required
 @admin_required
 def blog_categories(page):
@@ -197,7 +218,7 @@ def blog_categories(page):
     return render_template('blog/categories/categories.html', categories=the_categories)
 
 
-@settings.route('/categories/<int:category_id>', methods=['GET', 'POST'])
+@public.route('/categories/<int:category_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def edit_blog_category(category_id):
@@ -215,7 +236,7 @@ def edit_blog_category(category_id):
         db.session.add(category)
         flash('"{0}" has been saved'.format(category.name))
 
-        return redirect(url_for('settings.blog_categories'))
+        return redirect(url_for('public.blog_categories'))
 
     form.name.data = category.name
     form.slug.data = category.slug
@@ -226,7 +247,7 @@ def edit_blog_category(category_id):
                            category=category)
 
 
-@settings.route('/categories/new', methods=['GET', 'POST'])
+@public.route('/categories/new', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def add_blog_category():
@@ -243,12 +264,12 @@ def add_blog_category():
         db.session.add(category)
         flash('"{0}" has been saved'.format(category.name))
 
-        return redirect(url_for('settings.blog_categories'))
+        return redirect(url_for('public.blog_categories'))
 
     return render_template('blog/categories/add_category.html', js='posts/add_edit_category', form=form)
 
 
-@settings.route('/categories/delete/<int:category_id>', methods=['GET', 'POST'])
+@public.route('/categories/delete/<int:category_id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def delete_blog_category(category_id):
@@ -258,20 +279,20 @@ def delete_blog_category(category_id):
         db.session.delete(category)
 
         flash('"{0}" has been deleted'.format(category.name))
-        return redirect(url_for('settings.blog_categories'))
+        return redirect(url_for('public.blog_categories'))
 
     flash('Category does not exist')
-    return redirect('settings.blog_categories')
+    return redirect('public.blog_categories')
   
-@settings.route('/menu/')
-@settings.route('/menu')
+@public.route('/menu/')
+@public.route('/menu')
 @login_required
 def menus():
     all_menus = Menu.query.all()
-    return render_template('settings/menus/menus.html', js='menus/menus', menus=all_menus)
+    return render_template('public/menus/menus.html', js='menus/menus', menus=all_menus)
 
 
-@settings.route('/menu/<int:menu_id>', methods=['GET', 'POST'])
+@public.route('/menu/<int:menu_id>', methods=['GET', 'POST'])
 @login_required
 def menu(menu_id):
     the_menu = Menu.query.filter_by(id=menu_id).first()
@@ -286,15 +307,15 @@ def menu(menu_id):
         db.session.add(the_menu)
         flash("{0} has been saved".format(the_menu.name))
 
-        return redirect(url_for('settings.menus'))
+        return redirect(url_for('public.menus'))
 
     form.name.data = the_menu.name
 
     menu_items = the_menu.menu_items.order_by(MenuItem.weight)
 
-    return render_template('settings/menus/menu.html', js='menus/menu', form=form, menu=the_menu, menu_items=menu_items)
+    return render_template('public/menus/menu.html', js='menus/menu', form=form, menu=the_menu, menu_items=menu_items)
 
-@settings.route('/menu/new', methods=['GET', 'POST'])
+@public.route('/menu/new', methods=['GET', 'POST'])
 @login_required
 def add_menu():
     form = EditMenuForm()
@@ -308,12 +329,12 @@ def add_menu():
         db.session.add(the_menu)
         flash("{0} has been created".format(the_menu.name))
 
-        return redirect(url_for('settings.menus'))
+        return redirect(url_for('public.menus'))
 
-    return render_template("settings/menus/new.html", js='menus/new', form=form)
+    return render_template("public/menus/new.html", js='menus/new', form=form)
 
 
-@settings.route('/menu/<int:menu_id>/delete')
+@public.route('/menu/<int:menu_id>/delete')
 @login_required
 def delete_menu(menu_id):
     the_menu = Menu.query.filter_by(id=menu_id).first()
@@ -326,13 +347,13 @@ def delete_menu(menu_id):
         db.session.delete(the_menu)
 
         flash("{0} has been deleted".format(the_menu.name))
-        return redirect(url_for("settings.menus"))
+        return redirect(url_for("public.menus"))
 
     flash("That menu does not exist")
-    return redirect(url_for("settings.menus"))
+    return redirect(url_for("public.menus"))
 
 
-@settings.route('/menu/<int:menu_id>/item/<int:item_id>', methods=['GET', 'POST'])
+@public.route('/menu/<int:menu_id>/item/<int:item_id>', methods=['GET', 'POST'])
 @login_required
 def menu_item(menu_id, item_id):
     the_menu_item = MenuItem.query.filter_by(
@@ -351,23 +372,23 @@ def menu_item(menu_id, item_id):
             if item.id != the_menu_item.id:
                 flash(
                     "Menu Item can't use the same name as another item in the same menu")
-                return render_template("settings/menus/menu-item/menu-item.html", form=form, menu_item=the_menu_item)
+                return render_template("public/menus/menu-item/menu-item.html", form=form, menu_item=the_menu_item)
 
         db.session.add(the_menu_item)
         flash("{0} has been saved".format(the_menu_item.name))
 
-        return redirect(url_for("settings.menu", menu_id=the_menu_item.menu_id))
+        return redirect(url_for("public.menu", menu_id=the_menu_item.menu_id))
 
     form.name.data = the_menu_item.name
     form.slug.data = the_menu_item.slug
     form.menu.data = the_menu_item.menu_id
     form.weight.data = the_menu_item.weight
 
-    return render_template("settings/menus/menu-item/menu-item.html", js='menus/menu-item/menu-item', form=form,
+    return render_template("public/menus/menu-item/menu-item.html", js='menus/menu-item/menu-item', form=form,
                            menu_item=the_menu_item)
 
 
-@settings.route('/menu/<int:menu_id>/item/new', methods=['GET', 'POST'])
+@public.route('/menu/<int:menu_id>/item/new', methods=['GET', 'POST'])
 @login_required
 def add_menu_item(menu_id):
     form = EditMenuItemForm()
@@ -386,19 +407,19 @@ def add_menu_item(menu_id):
             menu_id=menu_id, name=the_menu_item.name).all()
         if len(items) > 0:
             flash("Menu Item can't use the same name as another item in the same menu")
-            return render_template("settings/menus/menu-item/menu-item.html", form=form, menu_item=the_menu_item)
+            return render_template("public/menus/menu-item/menu-item.html", form=form, menu_item=the_menu_item)
 
         db.session.add(the_menu_item)
         flash("{0} has been created".format(the_menu_item.name))
 
-        return redirect(url_for("settings.menu", menu_id=the_menu_item.menu_id))
+        return redirect(url_for("public.menu", menu_id=the_menu_item.menu_id))
 
     form.menu.data = menu_id
 
-    return render_template("settings/menus/menu-item/new.html", js='menus/menu-item/new', form=form, menu=the_menu)
+    return render_template("public/menus/menu-item/new.html", js='menus/menu-item/new', form=form, menu=the_menu)
 
 
-@settings.route('/menu/<int:menu_id>/item/<int:item_id>/delete')
+@public.route('/menu/<int:menu_id>/item/<int:item_id>/delete')
 @login_required
 def delete_menu_item(menu_id, item_id):
     the_menu_item = MenuItem.query.filter_by(
@@ -408,7 +429,7 @@ def delete_menu_item(menu_id, item_id):
         db.session.delete(the_menu_item)
 
         flash("{0} has been deleted".format(the_menu_item.name))
-        return redirect(url_for("settings.menu", menu_id=menu_id))
+        return redirect(url_for("public.menu", menu_id=menu_id))
 
     flash("That menu item doesn't exist")
-    return redirect(url_for("settings.menu", menu_id=menu_id))
+    return redirect(url_for("public.menu", menu_id=menu_id))

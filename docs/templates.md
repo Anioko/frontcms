@@ -25,12 +25,12 @@ This will cover various methods used in our jinja templates.
                 ('2nd drop', [
                   ('account.login', 'login 2', ''),
                   ('3rd drop', [
-                    ('main.index', 'home 2', '')
+                    ('public.index', 'home 2', '')
                   ])
                 ])
               ]
             ),
-            ('main.index', 'home 1', 'home')
+            ('public.index', 'home 1', 'home')
           ]
         %}
       #}

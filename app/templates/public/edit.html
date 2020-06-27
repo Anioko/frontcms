@@ -5,11 +5,11 @@
 
     <div class="ui grid container">
         <div class="eight wide computer sixteen wide mobile centered column">
-			<div class="ui raised segment">
+			<!-- <div class="ui raised segment">
 			  
 			<h1 class="ui diving header">Edit Site Setting</h1>
 			   <p> Use Snake_Case style when inserting the names e.g 'Google_Analytics_Api' or 'Range_Rover' . </p>
-			</div>		
+			</div>		 -->
             {% set flashes = {
                 'error':   get_flashed_messages(category_filter=['form-error']),
                 'warning': get_flashed_messages(category_filter=['form-check-email']),
@@ -18,8 +18,10 @@
             } %}
 
             {{ f.begin_form(form, flashes) }}
-                {{ f.render_form_field(form.name) }}
-                {{ f.render_form_field(form.value) }}
+                {{ f.render_form_field(form.site_title) }}
+                {{ f.render_form_field(form.siteaddress) }}
+                {{ f.render_form_field(form.administration_user_address) }}
+                {{ f.render_form_field(form.site_Language) }}
 
                 {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
                 {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}

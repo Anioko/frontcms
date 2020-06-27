@@ -4,13 +4,13 @@
 {% block content %}
     <div class="ui grid container">
         <div class="eight wide computer sixteen wide mobile centered column">
-			<div class="ui raised segment">
+			<!-- <div class="ui raised segment">
 			  <h4>Example </h4>
 			   <p>Name : Car , Value : Volvo x60. Hopefully this makes sense. If it does not then search for read this annswer for 
 			   <a href="https://stackoverflow.com/questions/25955749/what-is-a-key-value-pair">Key Value pairs</a>
 			   </p>
 			   <p> Use Snake_Case style when inserting the names e.g 'Google_Analytics_Api' or 'Range_Rover' . </p>
-			</div>		
+			</div>		 -->
             <h2 class="ui dividing header">Add</h2>
 
             {% set flashes = {
@@ -21,8 +21,10 @@
             } %}
 
             {{ f.begin_form(form, flashes) }}
-                {{ f.render_form_field(form.name) }}
-                {{ f.render_form_field(form.value) }}
+                {{ f.render_form_field(form.site_title) }}
+                {{ f.render_form_field(form.siteaddress) }}
+                {{ f.render_form_field(form.administration_user_address) }}
+                {{ f.render_form_field(form.site_Language) }}
 
                 {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
                 {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
