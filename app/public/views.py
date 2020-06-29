@@ -30,7 +30,7 @@ def about():
 @login_required
 @admin_required
 def site_public():
-    all_public = SiteSetting.query.all()
+    all_public = SiteSetting.query.order_by(SiteSetting.id).all()
     return render_template("public/index.html",
                            public=all_public)
 
