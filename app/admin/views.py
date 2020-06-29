@@ -31,6 +31,12 @@ def index():
     """Admin dashboard page."""
     return render_template('admin/index.html')
 
+@admin.route('/Settings/Dashboard/')
+@login_required
+@admin_required
+def site_public():
+    return redirect(url_for('public.site_public'))
+
 
 @admin.route('/new-user', methods=['GET', 'POST'])
 @login_required
