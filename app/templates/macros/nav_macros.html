@@ -26,35 +26,40 @@
     ]%}
     {% set user = [] %}
     {% if current_user.is_authenticated %}
-      {% set user = ([(current_user.role.index + '.index', current_user.role.name + ' Dashboard', 'user')]) %}
+      {% set user = ([(current_user.role.index + '.index', current_user.role.name + ' ', 'user')]) %}
     {% endif %} 
     {{ render_menu_items( endpoints +  user ) }}
 
     {% set frontend_settings_editor = [] %}
     {% if current_user.is_authenticated %}
-      {% set frontend_settings_editor = ([(current_user.role.index + '.site_public', ' Frontend Dashboard', 'settings')]) %}
+      {% set frontend_settings_editor = ([(current_user.role.index + '.site_public', ' Frontend', 'book')]) %}
     {% endif %} 
     {{ render_menu_items( frontend_settings_editor ) }}
 
+    {% set users_settings_editor = [] %}
+    {% if current_user.is_authenticated %}
+      {% set users_settings_editor = ([(current_user.role.index + '.user_dashboard', ' Users', 'users')]) %}
+    {% endif %} 
+    {{ render_menu_items( users_settings_editor ) }}
+	
+    {% set contact_settings_editor = [] %}
+    {% if current_user.is_authenticated %}
+      {% set contact_settings_editor = ([(current_user.role.index + '.contact_messages', ' Inbox', 'envelope')]) %}
+    {% endif %} 
+    {{ render_menu_items( contact_settings_editor ) }}
+
+    {% set payment_settings_editor = [] %}
+    {% if current_user.is_authenticated %}
+      {% set payment_settings_editor = ([(current_user.role.index + '.payment_dashboard', ' Payment', 'key')]) %}
+    {% endif %} 
+    {{ render_menu_items( payment_settings_editor ) }}
+	
 {% endmacro %}
 
 {# This renders the right hand side of the navigation bar. If the user is logged in, it links to 
    manage their account and logout (account routes). Otherwise, it links to register and login.
 #}
 
-{% macro public_items(current_user) %}
-    {% if current_user.is_authenticated and current_user.role == 2 %}
-      {% set endpoints = [
-        ('public.site_public', 'Frontend Dashboard', 'settings'),
-      ] %}
-      {{ render_menu_items(endpoints) }}
-    {% else %}
-      {% set endpoints = [
-
-      ] %}
-      {{ render_menu_items(endpoints) }}
-    {% endif %}
-{% endmacro %}
 
 {% macro account_items(current_user) %}
     {% if current_user.is_authenticated %}

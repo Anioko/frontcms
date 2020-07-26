@@ -16,3 +16,12 @@ from .photogalleryitem import *  # noqa
 from .page import *  # noqa
 from .public import *  # noqa
 from .upload import *  # noqa
+from .contact import *  # noqa
+from .payment import *  # noqa
+from .subscription import *  # noqa
+from .organisation import *  # noqa
+from .logo import *  # noqa
+from .message import *  # noqa
+from .notification import *  # noqa
+from .orgstaff import *  # noqa
+from .photo import *  # noqa

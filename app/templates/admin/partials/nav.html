@@ -1,0 +1,21 @@
+{% macro dashboard_option(title, endpoint, description=None, icon=None) %}
+    <a class="{% if request.endpoint == endpoint %} active {% endif %}item" href="{{ url_for(endpoint) }}">
+        <i class="{{ icon }}"></i>{{ title }}
+    </a>
+{% endmacro %}
+<div class="ui vertical fluid tabular menu">
+    {{ dashboard_option('Contact Messages', 'admin.contact_messages',
+                                    description='View and manage Contact Messages', icon='mail icon') }}
+    <!----<div class="ui dropdown item">
+        <i class="dropdown icon"></i>
+        Market Place
+        <div class="menu">
+            <div class="header">Market Place</div>
+            {# dashboard_option('Home', 'admin.marketplace_index',
+                                    description='Marketplace Home', icon='home icon') #}
+            {# include 'admin/marketplace/partials/nav.html' #}
+
+        </div>
+    </div>--->
+
+</div>

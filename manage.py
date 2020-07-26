@@ -32,6 +32,9 @@ def test():
     tests = unittest.TestLoader().discover('tests')
     unittest.TextTestRunner(verbosity=2).run(tests)
 
+@manager.command
+def create_tables():
+    db.create_all()
 
 @manager.command
 def recreate_db():

@@ -78,6 +78,9 @@ def create_app(config):
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint, url_prefix='/dashboard')
 
+    from .payment import payment as payment_blueprint
+    app.register_blueprint(payment_blueprint, url_prefix='/payment')
+    
     from .public import public as public_blueprint
     app.register_blueprint(public_blueprint)
 

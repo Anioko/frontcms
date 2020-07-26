@@ -5,6 +5,7 @@ from wtforms.fields import (
     PasswordField,
     StringField,
     SubmitField,
+    SelectField
 )
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import (
@@ -17,6 +18,8 @@ from wtforms.validators import (
 from app import db
 from app.models import Role, User
 
+
+#####Payment Forms Starts #####
 
 class ChangeUserEmailForm(FlaskForm):
     email = EmailField(
@@ -72,3 +75,17 @@ class NewUserForm(InviteUserForm):
     password2 = PasswordField('Confirm password', validators=[InputRequired()])
 
     submit = SubmitField('Create')
+
+
+#####User Forms Ends #####
+#####Payment Forms Start #####
+
+class PaymentSettingForm(FlaskForm):
+
+    name = SelectField("Stripe Public Key or Public Key",validators=[InputRequired()])
+    display_name = StringField("Display Name")
+    value = StringField("Value", validators=[InputRequired()])
+    submit = SubmitField('Submit')
+    delete = SubmitField('Delete')
+
+#####Payment Forms Ends #####

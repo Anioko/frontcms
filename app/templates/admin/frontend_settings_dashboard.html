@@ -1,0 +1,37 @@
+{% extends 'layouts/base.html' %}
+
+{% macro dashboard_option(title, endpoint, description=None, icon=None) %}
+    <a class="column" href="{{ url_for(endpoint) }}">
+        <div class="ui padded segment">
+            <h3 class="ui header">
+                {% if icon is not none %}
+                    <i class="{{ icon }}"></i>
+                {% endif %}
+                <div class="content">
+                    {{ title }}
+                    {% if description is not none %}
+                        <div class="sub header">
+                            {{ description }}
+                        </div>
+                    {% endif %}
+                </div>
+            </h3>
+        </div>
+    </a>
+{% endmacro %}
+
+{% block content %}
+    <div class="ui stackable centered grid container">
+        <div class="twelve wide column">
+            <h2 class="ui header">
+                Frontend Settings Dashboard
+            </h2>
+            <div class="ui two column stackable grid">
+                {{ dashboard_option('Landing Page Dashboard', 'admin.landing_setting',
+                                    description='Add or edit View landing page settings', icon='settings icon') }}
+                {{ dashboard_option('Landing Page Images Dashboard', 'admin.landing_image',
+                                    description='Add or edit View landing page image settings', icon='settings icon') }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
