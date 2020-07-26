@@ -27,8 +27,14 @@
                 Payment Settings Dashboard
             </h2>
             <div class="ui two column stackable grid">
-                {{ dashboard_option('Add or Edit API Keys', 'admin.payment_settings',
-                                    description='View and manage payment keys', icon='settings icon') }}
+                {{ dashboard_option('Add or Edit Free Plan Details', 'admin.free_pricing_plan_settings',
+                                    description='View and manage free plan', icon='settings icon') }}
+                {{ dashboard_option('Add or Edit Basic Plan Details', 'admin.basic_pricing_plan_settings',
+                                    description='View and manage basic plan', icon='settings icon') }}
+                {{ dashboard_option('Add or Edit Pro Plan Details', 'admin.pro_pricing_plan_settings',
+                                    description='View and manage pro plan', icon='settings icon') }}
+                {{ dashboard_option('Add or Edit Gold Plan Details', 'admin.gold_pricing_plan_settings',
+                                    description='View and manage gold plan', icon='settings icon') }}
             </div>
         </div>
     </div>

@@ -53,7 +53,12 @@
       {% set payment_settings_editor = ([(current_user.role.index + '.payment_dashboard', ' Payment', 'key')]) %}
     {% endif %} 
     {{ render_menu_items( payment_settings_editor ) }}
-	
+
+    {% set pricing_plan_settings_editor = [] %}
+    {% if current_user.is_authenticated %}
+      {% set pricing_plan_settings_editor = ([(current_user.role.index + '.pricing_plan_index', ' Plan', 'money bill alternate outline')]) %}
+    {% endif %} 
+    {{ render_menu_items( pricing_plan_settings_editor ) }}	
 {% endmacro %}
 
 {# This renders the right hand side of the navigation bar. If the user is logged in, it links to 

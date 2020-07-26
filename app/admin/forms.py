@@ -5,7 +5,10 @@ from wtforms.fields import (
     PasswordField,
     StringField,
     SubmitField,
-    SelectField
+    SelectField,
+    IntegerField,
+    DecimalField,
+    FloatField
 )
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import (
@@ -87,5 +90,18 @@ class PaymentSettingForm(FlaskForm):
     value = StringField("Value", validators=[InputRequired()])
     submit = SubmitField('Submit')
     delete = SubmitField('Delete')
+
+#####Payment Forms Ends #####
+
+#####Payment Forms Start #####
+
+class PricingPlanForm(FlaskForm):
+
+    name = StringField("Free or Basic or Pro or Gold",validators=[InputRequired()])
+    duration = IntegerField("Number of days. E.g: 30", validators=[InputRequired()])
+    cost = DecimalField("Cost e.g 0.00")
+    currency_symbol = StringField("symbol")
+    submit = SubmitField('Submit')
+
 
 #####Payment Forms Ends #####
