@@ -3,6 +3,8 @@
 {% import 'macros/check_password.html' as check %}
 
 {% set endpoints = [
+    ('account.profile', 'Profile'),
+	('account.change_profile_details', 'Update profile'),
     ('account.manage', 'Account information'),
     ('account.change_email_request', 'Change email address'),
     ('account.change_password', 'Change password'),

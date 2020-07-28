@@ -1,10 +1,27 @@
-from flask import current_app
-from flask_login import AnonymousUserMixin, UserMixin
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+import json
+import os
+
+import cv2
+from datetime import datetime
+from logging import log
+from time import time
+
+import socketio
+from flask import current_app, url_for
+from flask_jwt_extended import create_access_token
+from flask_login import AnonymousUserMixin, UserMixin, current_user
+from flask_rq import get_queue
 from itsdangerous import BadSignature, SignatureExpired
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from sqlalchemy import ForeignKey, or_, and_
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import backref, make_transient_to_detached, query_expression
+#from sqlalchemy_mptt.mixins import BaseNestedSets
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .. import db, login_manager
+from app.utils import pretty_date, db, login_manager, jsonify_object
+from app import whooshee
+import app
 
 
 class Permission:
@@ -44,7 +61,7 @@ class Role(db.Model):
     def __repr__(self):
         return '<Role \'%s\'>' % self.name
 
-
+@whooshee.register_model('first_name', 'last_name', 'city', 'state', 'country', 'profession')
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -53,9 +70,24 @@ class User(UserMixin, db.Model):
     last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
-    subscriptions = db.relationship('Subscription', backref='user',
-                             lazy='dynamic')
+
+    gender = db.Column(db.String(64), index=True)
+    profession = db.Column(db.String(64), index=True)
+    area_code = db.Column(db.String(6), index=True)
+    mobile_phone = db.Column(db.BigInteger, unique=True, index=True)
+    summary_text = db.Column(db.Text)
+    zip = db.Column(db.String(10), index=True)
+    city = db.Column(db.String(64), index=True)
+    state = db.Column(db.String(64), index=True)
+    country = db.Column(db.String(64), index=True)
+    socket_id = db.Column(db.Text())
+    online = db.Column(db.String(1), default='N')
+    invited_by = db.Column(db.String(128))
+
+    verified = db.Column(db.Boolean, default=False)
+    is_seller = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    score = query_expression()
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -66,6 +98,12 @@ class User(UserMixin, db.Model):
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
 
+    def toJson(self):
+        return jsonify_object(self)
+
+    def serialize(self):
+        return jsonify_object(self)
+
     def full_name(self):
         return '%s %s' % (self.first_name, self.last_name)
 
@@ -75,6 +113,10 @@ class User(UserMixin, db.Model):
 
     def is_admin(self):
         return self.can(Permission.ADMINISTER)
+
+    @property
+    def created_day(self):
+        return self.created_at.date()
 
     @property
     def password(self):
@@ -168,6 +210,12 @@ class User(UserMixin, db.Model):
                 first_name=fake.first_name(),
                 last_name=fake.last_name(),
                 email=fake.email(),
+                profession=fake.job(),
+                city=fake.city(),
+                country=fake.country(),
+                zip=fake.postcode(),
+                state=fake.state(),
+                summary_text=fake.text(),
                 password='password',
                 confirmed=True,
                 role=choice(roles),
@@ -182,8 +230,82 @@ class User(UserMixin, db.Model):
         return '<User \'%s\'>' % self.full_name()
 
 
+    def last_message(self, user_id):
+        message = Message.query.order_by(Message.timestamp.desc()). \
+            filter(or_(and_(Message.recipient_id == user_id, Message.user_id == self.id),
+                       and_(Message.recipient_id == self.id, Message.user_id == user_id))).first()
+        return message
+
+    def history(self, user_id, unread=False):
+        messages = Message.query.order_by(Message.timestamp.asc()). \
+            filter(or_(and_(Message.recipient_id == user_id, Message.user_id == self.id),
+                       and_(Message.recipient_id == self.id, Message.user_id == user_id))).all()
+        return messages
+
+    def new_messages(self, user_id=None):
+        if not user_id:
+            return Message.query.filter_by(recipient=self).filter(Message.read_at == None).distinct('user_id').count()
+        else:
+            return Message.query.filter_by(recipient=self).filter(Message.read_at == None).filter(
+                Message.user_id == user_id).count()
+
+    def add_notification(self, name, data, related_id=0, permanent=False):
+        from app.email import send_email
+        if not permanent:
+            self.notifications.filter_by(name=name).delete()
+        n = Notification(name=name, payload_json=json.dumps(data), user=self, related_id=related_id)
+        db.session.add(n)
+        db.session.commit()
+        n = Notification.query.get(n.id)
+        kwargs = data
+        kwargs['related'] = related_id
+        get_queue().enqueue(
+            send_email,
+            recipient=self.email,
+            subject='You Have a new notification on Mediville',
+            template='account/email/notification',
+            user=self.id,
+            link=url_for('main.notifications', _external=True),
+            notification=n.id,
+            **kwargs
+        )
+        if not current_app.config['DEBUG']:
+            ws_url = "https://www.mediville.com"
+            path = 'sockets/socket.io'
+        else:
+            get_queue().empty()
+            ws_url = "http://localhost:3000"
+            path = "socket.io"
+        sio = socketio.Client()
+        sio.connect(ws_url + "?token={}".format(create_access_token(identity=current_user.id)), socketio_path=path)
+        data = n.parsed()
+        u = jsonify_object(data['user'])
+        tu = jsonify_object(self)
+        data['user'] = {key: u[key] for key in u.keys()
+                        & {'first_name', 'id', 'email', 'socket_id'}}
+        data['touser'] = {key: tu[key] for key in tu.keys()
+                          & {'first_name', 'id', 'email', 'socket_id'}}
+        sio.emit('new_notification', {'notification': data})
+        return n
+
+
+    def get_photo(self):
+        photos = self.photos.all()
+        if len(photos) > 0:
+            return url_for('_uploads.uploaded_file', setname='images',
+                           filename=photos[0].image_filename, _external=True)
+        else:
+            if self.gender == 'Female':
+                return "https://1.semantic-ui.com/images/avatar/large/veronika.jpg"
+            else:
+                return "https://1.semantic-ui.com/images/avatar/large/jenny.jpg"
+
+    def __repr__(self):
+        return '<User \'%s\'>' % self.full_name
+
+
 class AnonymousUser(AnonymousUserMixin):
-    def can(self, _):
+    def can(self):
         return False
 
     def is_admin(self):

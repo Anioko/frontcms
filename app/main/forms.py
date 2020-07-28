@@ -12,12 +12,6 @@ from wtforms import StringField, SelectField, DateTimeField, IntegerField
 #from app.wtform_widgets import MarkdownField
 from flask_pagedown.fields import PageDownField
 from wtforms.validators import DataRequired, Length
-from app.models import BlogCategory
-from app.models import BlogPostStatus
-from app.models import Page
-from app.models import BlogPost
-from app.models import Menu
-from app.models import MenuItem
 from flask_wtf import Form
 
 #from app.models import User

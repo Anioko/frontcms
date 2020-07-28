@@ -1,0 +1,62 @@
+{% extends 'layouts/base.html' %}
+{% import 'macros/form_macros.html' as f %}
+{% import 'macros/check_password.html' as check %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block content %}
+    <div class="ui stackable centered grid container">
+        <div class="twelve wide column">
+            <a class="ui basic compact button" href="{{ url_for('admin.pricing_plan_index') }}">
+                <i class="caret left icon"></i>
+                Back to dashboard
+            </a>
+            <h2 class="ui header">
+                Transaction Fee Management
+                <div class="sub header">Manage Transaction Fees</div>
+            </h2>
+
+            {% set flashes = {
+                'error':   get_flashed_messages(category_filter=['form-error']),
+                'warning': get_flashed_messages(category_filter=['form-check-email']),
+                'info':    get_flashed_messages(category_filter=['form-info']),
+                'success': get_flashed_messages(category_filter=['form-success'])
+            } %}
+
+            {{ f.begin_form(form, flashes) }}
+
+                    {{ f.render_form_field(form.provider_name) }}
+
+                <div class="four fields">
+                    {{ f.render_form_field(form.local_fee) }}
+                    {{ f.render_form_field(form.european_fee) }}
+                    {{ f.render_form_field(form.international_fee) }}
+					{{ f.render_form_field(form.our_fee) }}
+                </div>
+
+                <div class="four fields">
+                    {{ f.render_form_field(form.local_percentage) }}
+                    {{ f.render_form_field(form.european_percentage) }}
+                    {{ f.render_form_field(form.international_percentage) }}
+					{{ f.render_form_field(form.our_percentage) }}
+                </div>
+                <div class="two fields">
+				    {{ f.render_form_field(form.transfer_fee) }}
+					{{ f.render_form_field(form.currency_symbol) }}
+                </div>
+					
+                {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
+                {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
+                {{ f.form_message(flashes['info'], header='Information', class='info') }}
+                {{ f.form_message(flashes['success'], header='Success!', class='success') }}
+
+                {% for field in form | selectattr('type', 'equalto', 'SubmitField') %}
+                    {{ f.render_form_field(field) }}
+                {% endfor %}
+
+            {{ f.end_form() }}
+
+        </div>
+    </div>
+{% endblock %}

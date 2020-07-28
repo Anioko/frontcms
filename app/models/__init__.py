@@ -5,14 +5,6 @@ module (as opposed to just their python files)
 
 from .user import *  # noqa
 from .miscellaneous import *  # noqa
-from .blogcategory import *  # noqa
-from .blogpoststatus import *  # noqa
-from .blogpost import *  # noqa
-from .file import *  # noqa
-from .menu import *  # noqa
-from .menuitem import *  # noqa
-from .photogallery import *  # noqa
-from .photogalleryitem import *  # noqa
 from .page import *  # noqa
 from .public import *  # noqa
 from .upload import *  # noqa
@@ -20,3 +12,11 @@ from .contact import *  # noqa
 from .payment import *  # noqa
 from .subscription import *  # noqa
 from .pricingplan import *  # noqa
+from .transactionfee import *  # noqa
+from .blog import *  # noqa
+from .photo import *  # noqa
+from .message import *  # noqa
+from .organisation import *  # noqa
+from .orgstaff import *  # noqa
+from .notification import *  # noqa
+from .logo import *  # noqa

@@ -24,7 +24,7 @@
     <div class="ui stackable centered grid container">
         <div class="twelve wide column">
             <h2 class="ui header">
-                Payment Settings Dashboard
+                Pricing Plan Settings Dashboard
             </h2>
             <div class="ui two column stackable grid">
                 {{ dashboard_option('Add or Edit Free Plan Details', 'admin.free_pricing_plan_settings',
@@ -35,6 +35,20 @@
                                     description='View and manage pro plan', icon='settings icon') }}
                 {{ dashboard_option('Add or Edit Gold Plan Details', 'admin.gold_pricing_plan_settings',
                                     description='View and manage gold plan', icon='settings icon') }}
+            </div>
+        </div>
+    </div>
+
+    <div class="ui stackable centered grid container">
+        <div class="twelve wide column">
+            <h2 class="ui header">
+                Transaction Revenue Model (Transaction Fee) Settings Dashboard
+            </h2>
+            <div class="ui two column stackable grid">
+                {{ dashboard_option('Add or Edit Stripe Transaction Fee Details', 'admin.stripe_transaction_fee_settings',
+                                    description='View and manage free plan', icon='settings icon') }}
+                {{ dashboard_option('Add or Edit Paystack Transaction Fee Details', 'admin.paystack_transaction_fee_settings',
+                                    description='View and manage basic plan', icon='settings icon') }}
             </div>
         </div>
     </div>

@@ -5,6 +5,8 @@ from flask import (
     render_template,
     request,
     url_for,
+    make_response,
+    session
 )
 from flask_login import (
     current_user,
@@ -27,55 +29,125 @@ from app.account.forms import (
 from app.email import send_email
 from app.models import User
 
+from .apis import GetMessages, PostMessage#, ToggleFollow
+from .forms import *
+from app.api import main_api
+
+import datetime
+
+from app.decorators import anonymous_required
+
 account = Blueprint('account', __name__)
 
 
 @account.route('/login', methods=['GET', 'POST'])
+@anonymous_required
 def login():
-    """Log in an existing user."""
+    next = ''
+    if 'next' in request.values:
+        next = request.values['next']
     form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user is not None and user.password_hash is not None and \
-                user.verify_password(form.password.data):
-            login_user(user, form.remember_me.data)
-            flash('You are now logged in. Welcome back!', 'success')
-            return redirect(request.args.get('next') or url_for('public.index'))
-        else:
-            flash('Invalid email or password.', 'form-error')
-    return render_template('account/login.html', form=form)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            user_instance = User.query.filter_by(email=form.email.data).first()
+            if user_instance is not None and user_instance.password_hash is not None and \
+                    user_instance.verify_password(form.password.data):
+                login_user(user_instance, form.remember_me.data)
+                user_cart = MCart.query.filter_by(user_id=current_user.id).order_by(MCart.id.desc()).first()
+                if user_cart:
+                    MCart.query.filter_by(user_id=current_user.id).filter(MCart.id != user_cart.id).delete()
+                else:
+                    session_id = session['cart_id']
+                    cart = MCart.query.filter_by(session_id=session_id).order_by(MCart.id.desc()).first()
+                    if cart:
+                        MCart.query.filter_by(session_id=session_id).filter(MCart.id != cart.id).delete()
+                        cart.user_id = current_user.id
+                        db.session.add(cart)
+                        db.session.commit()
+                if request.form['next'] != '':
+                    resp = make_response(redirect(request.form['next']))
+                    resp.set_cookie('buyer_jwt', 'bar', max_age=0)
+                    resp.set_cookie('jwt_token', create_access_token(identity=form.email.data), expires=datetime.datetime.now() + datetime.timedelta(days=30))
+                    return resp
+                flash('You are now logged in. Welcome back!', 'success')
+                resp = make_response(redirect(url_for('main.index')))
+                resp.set_cookie('buyer_jwt', 'bar', max_age=0)
+                resp.set_cookie('jwt_token', create_access_token(identity=user_instance.id),
+                                expires=datetime.datetime.now() + datetime.timedelta(days=30))
+                return resp
+            else:
+                flash('Invalid email or password.', 'form-error')
+    return render_template('account/login.html', form=form, next=next)
 
 
 @account.route('/register', methods=['GET', 'POST'])
+@anonymous_required
 def register():
     """Register a new user, and send them a confirmation email."""
     form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User(
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            email=form.email.data,
-            password=form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        token = user.generate_confirmation_token()
-        confirm_link = url_for('account.confirm', token=token, _external=True)
-        get_queue().enqueue(
-            send_email,
-            recipient=user.email,
-            subject='Confirm Your Account',
-            template='account/email/confirm',
-            user=user,
-            confirm_link=confirm_link)
-        flash('A confirmation link has been sent to {}.'.format(user.email),
-              'warning')
-        return redirect(url_for('public.index'))
-    return render_template('account/register.html', form=form)
+    choices = [('0', "No Recruiter")]+[('{}'.format(user.id), user.full_name) for user in User.query.filter_by(profession='Recruiter').all()]
+    form.recruiter.choices = choices
+    form.recruiter.process_data(form.recruiter.data)
+    # print(form.recruiter.data, form.recruiter.choices, form.profession.data)
+    if request.method == 'GET':
+        return render_template('account/register.html', form=form)
+    else:
+        if form.validate_on_submit():
+            # print(recruiter_id)
+            user_instance = User(
+                first_name=form.first_name.data,
+                last_name=form.last_name.data,
+                email=form.email.data,
+                gender=form.gender.data,
+                profession=profession,
+                area_code=form.area_code.data,
+                mobile_phone=form.mobile_phone.data,
+                #summary_text=form.summary_text.data,
+                zip=form.zip.data,
+                city=form.city.data,
+                state=form.state.data,
+                country=form.country.data,
+                password=form.password.data)
+            db.session.add(user_instance)
+            db.session.commit()
+            db.session.refresh(user_instance)
+            MOrder.query.filter_by(email=user_instance.email).update({'buyer_id': user_instance.id}, synchronize_session='evaluate')
+            if request.files['photo']:
+                image_filename = images.save(request.files['photo'])
+                image_url = images.url(image_filename)
+                picture_photo = Photo(
+                    image_filename=image_filename,
+                    image_url=image_url,
+                    user_id=user_instance.id,
+                )
+                db.session.add(picture_photo)
+            db.session.commit()
+            token = user_instance.generate_confirmation_token()
+            confirm_link = url_for('account.confirm', token=token, _external=True)
+            get_queue().enqueue(
+                send_email,
+                recipient=user_instance.email,
+                subject='Confirm Your Account',
+                template='account/email/confirm',
+                user=user_instance.id,
+                confirm_link=confirm_link)
+            flash('A confirmation link has been sent to {}.'.format(user_instance.email), 'warning')
+            if current_user.is_anonymous:
+                return redirect(url_for('account.login'))
+        else:
+            flash('Error! Data was not added.', 'error')
+        return render_template('account/register.html', form=form)
 
 
 @account.route('/logout')
 @login_required
 def logout():
+    user_cart = MCart.query.filter_by(user_id=current_user.id).order_by(MCart.id.desc()).first()
+    if user_cart:
+        MCart.query.filter_by(user_id=current_user.id).filter(MCart.id != user_cart.id).delete()
+        user_cart.session_id = 'NONE'
+        db.session.add(user_cart)
+        db.session.commit()
     logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('public.index'))
@@ -289,3 +361,9 @@ def unconfirmed():
     if current_user.is_anonymous or current_user.confirmed:
         return redirect(url_for('public.index'))
     return render_template('account/unconfirmed.html')
+
+
+# apis
+main_api.add_resource(GetMessages, '/messages/<int:user_id>/<int:page_id>')
+main_api.add_resource(PostMessage, '/messages/<int:recipient_id>')
+#main_api.add_resource(ToggleFollow, '/toggle_follow')
